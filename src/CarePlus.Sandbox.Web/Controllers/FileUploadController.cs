@@ -39,13 +39,14 @@ namespace CarePlus.Sandbox.Web.Controllers
 
             try
             {
-                using (var stream = file.OpenReadStream())
+                using (var memoryStream = new MemoryStream())
                 {
+                    await file.CopyToAsync(memoryStream);
                     var request = new UploadFileRequest
                     {
                         Bucket = bucket,
                         ObjectName = string.IsNullOrWhiteSpace(objectName) ? file.FileName : objectName,
-                        FileStream = stream,
+                        FileContent = memoryStream.ToArray(),
                         ContentFile = file.ContentType
                     };
 
