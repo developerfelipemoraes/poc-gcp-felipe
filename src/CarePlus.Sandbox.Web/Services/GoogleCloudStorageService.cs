@@ -1,33 +1,60 @@
 using System.Threading.Tasks;
 using CarePlus.Sandbox.Application.GoogleCloudStorage.Request;
-using Google.Cloud.Storage.V1; // Assuming Google.Cloud.Storage.V1 package is referenced
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.IO;
 
 namespace CarePlus.Sandbox.Web.Services
 {
     public class GoogleCloudStorageService : IGoogleCloudStorageService
     {
+        private readonly HttpClient _httpClient;
+
+        public GoogleCloudStorageService(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }
+
         public async Task UploadFileStream(UploadFileRequest request)
         {
-            // Note: This requires the 'Google.Cloud.Storage.V1' NuGet package.
-            // Ensure GOOGLE_APPLICATION_CREDENTIALS environment variable is set or authentication is handled.
+            using var content = new MultipartFormDataContent();
 
-            // If the client instantiation needs specific configuration, it should be done here or injected.
-            // For simplicity, we use the default create which uses the environment credentials.
-            var storageClient = await StorageClient.CreateAsync();
-
-            // Ensure the stream is at the beginning
-            if (request.FileStream.CanSeek)
+            if (!string.IsNullOrEmpty(request.Bucket))
             {
-                request.FileStream.Position = 0;
+                content.Add(new StringContent(request.Bucket), "Bucket");
             }
 
-            await storageClient.UploadObjectAsync(
-                request.Bucket,
-                request.ObjectName,
-                request.ContentFile, // Using ContentFile as ContentType
-                request.FileStream
-            );
+            if (!string.IsNullOrEmpty(request.ObjectName))
+            {
+                content.Add(new StringContent(request.ObjectName), "ObjectName");
+            }
+
+            if (!string.IsNullOrEmpty(request.ContentFile))
+            {
+                content.Add(new StringContent(request.ContentFile), "ContentFile");
+            }
+
+            if (request.FileStream != null)
+            {
+                if (request.FileStream.CanSeek)
+                {
+                    request.FileStream.Position = 0;
+                }
+
+                var streamContent = new StreamContent(request.FileStream);
+
+                if (!string.IsNullOrEmpty(request.ContentFile))
+                {
+                    streamContent.Headers.ContentType = new MediaTypeHeaderValue(request.ContentFile);
+                }
+
+                // Use ObjectName as filename if available, otherwise default
+                string fileName = !string.IsNullOrEmpty(request.ObjectName) ? request.ObjectName : "file";
+                content.Add(streamContent, "FileStream", fileName);
+            }
+
+            var response = await _httpClient.PostAsync("upload", content);
+            response.EnsureSuccessStatusCode();
         }
     }
 }
