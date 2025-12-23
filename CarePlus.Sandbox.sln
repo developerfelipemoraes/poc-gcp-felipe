@@ -1,0 +1,25 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarePlus.Sandbox.Web", "src\CarePlus.Sandbox.Web\CarePlus.Sandbox.Web.csproj", "{4A2F8D53-92B8-4A59-8C9E-7A1B2C3D4E5F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4A2F8D53-92B8-4A59-8C9E-7A1B2C3D4E5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A2F8D53-92B8-4A59-8C9E-7A1B2C3D4E5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A2F8D53-92B8-4A59-8C9E-7A1B2C3D4E5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A2F8D53-92B8-4A59-8C9E-7A1B2C3D4E5F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B1C2D3E4-F5A6-7B8C-9D0E-1F2A3B4C5D6E}
+	EndGlobalSection
+EndGlobal
