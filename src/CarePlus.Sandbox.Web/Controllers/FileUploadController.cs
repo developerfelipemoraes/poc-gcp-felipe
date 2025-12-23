@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 using CarePlus.Sandbox.Application.GoogleCloudStorage.Request;
 using CarePlus.Sandbox.Web.Services;
-using System.IO;
 
 namespace CarePlus.Sandbox.Web.Controllers
 {
@@ -23,44 +20,38 @@ namespace CarePlus.Sandbox.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile file, string bucket, string objectName)
+        public async Task<IActionResult> Upload(UploadFileRequest request)
         {
-            if (file == null || file.Length == 0)
+            if (request.File == null || request.File.Length == 0)
             {
-                ModelState.AddModelError("", "Please select a file.");
+                ModelState.AddModelError("File", "Please select a file.");
                 return View("Index");
             }
 
-            if (string.IsNullOrWhiteSpace(bucket))
+            if (string.IsNullOrEmpty(request.Bucket))
             {
-                ModelState.AddModelError("", "Bucket name is required.");
+                ModelState.AddModelError("Bucket", "Bucket name is required.");
                 return View("Index");
+            }
+
+            // If ObjectName is empty, use the file name
+            if (string.IsNullOrEmpty(request.ObjectName))
+            {
+                request.ObjectName = request.File.FileName;
             }
 
             try
             {
-                using (var memoryStream = new MemoryStream())
-                {
-                    await file.CopyToAsync(memoryStream);
-                    var request = new UploadFileRequest
-                    {
-                        Bucket = bucket,
-                        ObjectName = string.IsNullOrWhiteSpace(objectName) ? file.FileName : objectName,
-                        FileContent = memoryStream.ToArray(),
-                        ContentFile = file.ContentType
-                    };
+                await _storageService.UploadFileStream(request);
 
-                    await _storageService.UploadFileStream(request);
-
-                    ViewBag.Message = $"File '{file.FileName}' uploaded successfully to bucket '{bucket}'.";
-                }
+                ViewBag.Message = $"File '{request.ObjectName}' uploaded successfully to bucket '{request.Bucket}'.";
+                return View("Index");
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", $"Error uploading file: {ex.Message}");
+                ModelState.AddModelError(string.Empty, $"Error uploading file: {ex.Message}");
+                return View("Index");
             }
-
-            return View("Index");
         }
     }
 }
